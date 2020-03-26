@@ -16,6 +16,35 @@
     const VIDEO_WIDTH = 640;
     const VIDEO_HEIGHT = 500;
 
+    let websocket;
+    if ("WebSocket" in window) {
+      // alert("WebSocket is supported by your Browser!");
+      
+      //  open a web socket
+      websocket = new WebSocket("ws://localhost:4649/Echo");
+
+      websocket.onopen = function() {
+        
+        // Web Socket is connected, send data using send()
+        websocket.send("Connected to WebSocket server.");
+        console.log("Message is sent: 'Connected to WebSocket server'");
+      };
+
+      websocket.onmessage = function (evt) { 
+        var received_msg = evt.data;
+        console.log("Message is received: " + received_msg);
+      };
+
+      websocket.onclose = function() { 
+        // websocket is closed.
+        console.log("Connection is closed."); 
+      };
+    } else {
+        // The browser doesn't support WebSocket
+        alert("WebSocket NOT supported by your Browser!");
+    }
+
+
     async function main() {
       // Load the MediaPipe handpose model.
       var model = await handpose.load();
@@ -37,7 +66,8 @@
       setInterval(async function() {
         hand_tracking().then((prediction) => {
           if (prediction.length) {
-            console.log(prediction)
+            console.log(prediction[0])
+            websocket.send(prediction[0].handInViewConfidence);
           }
         })
       }, 33) // ~ 30 FPS
