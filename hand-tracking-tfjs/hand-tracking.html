@@ -81,7 +81,7 @@
         hand_tracking().then((prediction) => {
           if (prediction.length) {
             console.log(prediction[0])
-            websocket.send(prediction[0].handInViewConfidence);
+            websocket.send(JSON.stringify(prediction[0]));
           }
         })
       }, 33) // ~ 30 FPS

@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using WebSocketSharp;
 using WebSocketSharp.Server;
+using SimpleJSON;
 
 public class GameServer : MonoBehaviour
 {
@@ -26,8 +27,9 @@ public class Echo : WebSocketBehavior
 {
     protected override void OnMessage (MessageEventArgs e)
     {
-        Debug.Log(e.Data);
-        // var msg = "Example"
-        // Send (msg);
+        // Debug.Log(e.Data);
+        // Send ("");
+        var json = JSON.Parse(e.Data);
+        Debug.Log("Number of landmarks: " + json["landmarks"].Count);
     }
 }
