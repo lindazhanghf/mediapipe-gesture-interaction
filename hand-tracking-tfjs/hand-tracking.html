@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- <meta http-equiv="refresh" content="0;url=dist/index.html"> -->
+    <meta charset="utf-8"/>
+    <title>Hand Tracking Web</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
+
+</head>
+
+<body>
+  <script language="javascript">
+    const VIDEO_WIDTH = 640;
+    const VIDEO_HEIGHT = 500;
+
+    async function main() {
+      // Load the MediaPipe handpose model.
+      var model = await handpose.load();
+
+      // Pass in a video stream (or an image, canvas, or 3D tensor) to obtain a
+      // hand prediction from the MediaPipe graph.
+      const video = await setupCamera();
+      video.play();
+
+      async function hand_tracking() {
+        const predictions = await model.estimateHands(video)
+        if (predictions.length > 0) {
+          const result = predictions[0].landmarks
+          // console.log(result)
+        }
+        return predictions
+      }
+      
+      setInterval(async function() {
+        hand_tracking().then((prediction) => {
+          if (prediction.length) {
+            console.log(prediction)
+          }
+        })
+      }, 33) // ~ 30 FPS
+    }
+
+    async function setupCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error(
+          'Browser API navigator.mediaDevices.getUserMedia not available');
+      }
+
+      const video = document.getElementById('video');
+      const stream = await navigator.mediaDevices.getUserMedia({
+        'audio': false,
+        'video': {
+          facingMode: 'user',
+          // Only setting the video to a specified size in order to accommodate a
+          // point cloud, so on mobile devices accept the default size.
+          width: VIDEO_WIDTH,
+          height: VIDEO_HEIGHT,
+        },
+      });
+      video.srcObject = stream;
+
+      return new Promise((resolve) => {
+        video.onloadedmetadata = () => {
+          resolve(video);
+        };
+      });
+    }
+
+    main();
+  </script>
+  <div>
+    hand tracking
+  </div>
+
+  <div>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+  </div>
+</body>
+
+</html>
